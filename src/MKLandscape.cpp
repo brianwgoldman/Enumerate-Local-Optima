@@ -14,7 +14,8 @@
 using std::cout;
 using std::endl;
 
-MKLandscape::MKLandscape(string filename) : length(0) {
+MKLandscape::MKLandscape(string filename)
+    : length(0) {
   std::ifstream input(filename);
   string line;
   char head;
@@ -59,12 +60,13 @@ MKLandscape::MKLandscape(string filename) : length(0) {
   // Ensures that all variable indices are within the specified length
   for (const auto & subfunction : subfunctions) {
     for (const auto & variable_index : subfunction.variables) {
-      assert (variable_index < length);
+      assert(variable_index < length);
     }
   }
 }
 
-int MKLandscape::evaluate(size_t subfunction_index, const vector<bool>& solution) const {
+int MKLandscape::evaluate(size_t subfunction_index,
+                          const vector<bool>& solution) const {
   const auto& subfunction = subfunctions[subfunction_index];
   size_t index = 0;
   for (const auto& neighbor : subfunction.variables) {

@@ -10,7 +10,9 @@
 using std::cout;
 using std::endl;
 
-Enumeration::Enumeration(const MKLandscape & landscape_, size_t radius) : landscape(landscape_), length(landscape_.get_length()) {
+Enumeration::Enumeration(const MKLandscape & landscape_, size_t radius)
+    : landscape(landscape_),
+      length(landscape_.get_length()) {
   start = std::chrono::steady_clock::now();
   auto graph = build_graph(landscape);
   moves = k_order_subgraphs(graph, radius);
@@ -135,7 +137,7 @@ void Enumeration::remap() {
   new_to_org.assign(length, -1);
 
   while (highest_available >= 0) {
-    int move=-1;
+    int move = -1;
     for (const auto& bin : move_bin) {
       if (bin.size()) {
         move = *bin.begin();
@@ -154,8 +156,8 @@ void Enumeration::remap() {
           for (const auto& affected : bit_to_move[bit]) {
             int current = location[affected];
             move_bin[current].erase(affected);
-            move_bin[current-1].insert(affected);
-            location[affected] = current-1;
+            move_bin[current - 1].insert(affected);
+            location[affected] = current - 1;
           }
           highest_available--;
         }
@@ -164,7 +166,6 @@ void Enumeration::remap() {
     move_bin[0].erase(move);
   }
 }
-
 
 void Enumeration::bin_moves() {
   move_to_bin.resize(moves.size());
@@ -187,7 +188,7 @@ void Enumeration::bin_moves() {
   }
 }
 
-void Enumeration::enumerate(std::ostream& out, bool hyper,  bool reorder) {
+void Enumeration::enumerate(std::ostream& out, bool hyper, bool reorder) {
   reference.assign(length, false);
 
   initialize_deltas();
@@ -197,11 +198,11 @@ void Enumeration::enumerate(std::ostream& out, bool hyper,  bool reorder) {
   bin_moves();
 
   size_t count = 0;
-  int pass=1;
+  int pass = 1;
   int progress = -1;
   cout << "Pass " << pass << ": ";
   out << "# Fitness Representation" << endl;
-  int i=length - 1;
+  int i = length - 1;
   while (true) {
     if (hyper) {
       while (i > 0 and moves_in_bin[i] == 0) {
@@ -210,7 +211,7 @@ void Enumeration::enumerate(std::ostream& out, bool hyper,  bool reorder) {
     } else {
       i = 0;
     }
-    if (improving_moves == 0) { // nothing needs to be flipped to be a local optimum
+    if (improving_moves == 0) {  // nothing needs to be flipped to be a local optimum
       out << fitness << " ";
       for (const auto bit : reference) {
         out << bit;
@@ -219,7 +220,7 @@ void Enumeration::enumerate(std::ostream& out, bool hyper,  bool reorder) {
       count++;
     }
     while (i < length and reference[new_to_org[i]]) {
-      make_flip(new_to_org[i]); // reference[i] = 0
+      make_flip(new_to_org[i]);  // reference[i] = 0
       i++;
     }
     // End is reached
@@ -230,14 +231,14 @@ void Enumeration::enumerate(std::ostream& out, bool hyper,  bool reorder) {
       out << "# Count: " << count << " Seconds: " << elapsed << endl;
       return;
     }
-    make_flip(new_to_org[i]); // reference[i] = 1
+    make_flip(new_to_org[i]);  // reference[i] = 1
     // Everything below here is just for output purposes
     if (i > progress) {
-      progress=i;
+      progress = i;
       cout << i << ", ";
       cout.flush();
-      if (progress==length-pass) {
-        progress=-1;
+      if (progress == length - pass) {
+        progress = -1;
         pass++;
         cout << endl << "Pass " << pass << ": ";
       }

@@ -22,10 +22,9 @@ vector<vector<size_t>> k_order_subgraphs(
     const vector<unordered_set<size_t>>& graph, size_t radius);
 
 // Recursive function used internally by k_order_subgraphs.
-void recurse(const vector<unordered_set<size_t>>& graph,
-             size_t v, unordered_set<size_t> & closed, vector<size_t> & prev,
+void recurse(const vector<unordered_set<size_t>>& graph, size_t v,
+             unordered_set<size_t> & closed, vector<size_t> & prev,
              unordered_set<size_t> & prevopen, size_t radius,
              vector<vector<size_t>> & found);
-
 
 #endif /* GRAPHUTILITIES_H_ */

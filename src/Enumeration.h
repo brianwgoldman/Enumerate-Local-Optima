@@ -16,7 +16,7 @@
 class Enumeration {
  public:
   Enumeration(const MKLandscape & landscape_, size_t radius);
-  void enumerate(std::ostream& out, bool hyper=true, bool reorder=true);
+  void enumerate(std::ostream& out, bool hyper = true, bool reorder = true);
   int make_flip(size_t index);
  protected:
   const MKLandscape& landscape;

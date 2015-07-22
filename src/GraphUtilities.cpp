@@ -8,7 +8,8 @@
 #include "GraphUtilities.h"
 
 vector<unordered_set<size_t>> build_graph(const MKLandscape& landscape) {
-  vector<unordered_set<size_t>> graph(landscape.get_length(), unordered_set<size_t>());
+  vector<unordered_set<size_t>> graph(landscape.get_length(),
+                                      unordered_set<size_t>());
   const auto& subfunctions = landscape.get_subfunctions();
   for (const auto & subfunction : subfunctions) {
     for (const auto & x : subfunction.variables) {
@@ -31,7 +32,7 @@ vector<vector<size_t>> k_order_subgraphs(
   // Vertices already in the set, initially empty
   vector<size_t> prev;
   // Call the recursive function starting at each vertex
-  for (size_t v=0; v < graph.size(); v++) {
+  for (size_t v = 0; v < graph.size(); v++) {
     closed.insert(v);
     recurse(graph, v, closed, prev, prevopen, radius, found);
   }
@@ -40,8 +41,8 @@ vector<vector<size_t>> k_order_subgraphs(
 
 // Recursive function used by k_order_subgraphs to expand each subset by "v"
 // and then find all possible subgraphs which contain "prev" and "v"
-void recurse(const vector<unordered_set<size_t>>& graph,
-             size_t v, unordered_set<size_t> & closed, vector<size_t> & prev,
+void recurse(const vector<unordered_set<size_t>>& graph, size_t v,
+             unordered_set<size_t> & closed, vector<size_t> & prev,
              unordered_set<size_t> & prevopen, size_t radius,
              vector<vector<size_t>> & found) {
   // Create a new subset containing "prev" and "v"
