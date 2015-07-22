@@ -16,16 +16,16 @@
 class Enumeration {
  public:
   Enumeration(const MKLandscape & landscape_, size_t radius);
-  void enumerate(std::ostream& out);
+  void enumerate(std::ostream& out, bool hyper=true, bool reorder=true);
   int make_flip(size_t index);
  protected:
   const MKLandscape& landscape;
+  int length;
   vector<bool> reference;
   int fitness;
   // List of all moves, which are just collections of indices
   vector<vector<size_t>> moves;
   // Lookup tables to find which moves effect what subfunctions, and vice versa
-  // TODO Make these vectors of vectors
   vector<unordered_set<size_t>> move_to_sub, sub_to_move;
   vector<vector<size_t>> bit_to_sub;
   vector<size_t> move_to_bin;
@@ -33,6 +33,7 @@ class Enumeration {
   vector<size_t> single_bit_moves;
   // Table storing the fitness effect of making a particular move
   vector<int> delta;
+  int improving_moves;
 
   void initialize_deltas();
   void flip_move(size_t move_index);

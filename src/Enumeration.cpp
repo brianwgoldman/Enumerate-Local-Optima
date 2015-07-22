@@ -6,12 +6,15 @@
  */
 
 #include "Enumeration.h"
+#include <algorithm>
+using std::cout;
+using std::endl;
 
-Enumeration::Enumeration(const MKLandscape & landscape_, size_t radius) : landscape(landscape_) {
+Enumeration::Enumeration(const MKLandscape & landscape_, size_t radius) : landscape(landscape_), length(landscape_.get_length()) {
   start = std::chrono::steady_clock::now();
   auto graph = build_graph(landscape);
   moves = k_order_subgraphs(graph, radius);
-  bit_to_sub.resize(landscape.get_length());
+  bit_to_sub.resize(length);
 
   const auto& subfunctions = landscape.get_subfunctions();
   for (size_t sub = 0; sub < subfunctions.size(); sub++) {
@@ -22,7 +25,7 @@ Enumeration::Enumeration(const MKLandscape & landscape_, size_t radius) : landsc
 
   sub_to_move.resize(subfunctions.size());
   move_to_sub.resize(moves.size());
-  single_bit_moves.resize(landscape.get_length(), -1);
+  single_bit_moves.resize(length, -1);
 
   for (size_t m = 0; m < moves.size(); m++) {
     if (moves[m].size() == 1) {
@@ -39,7 +42,12 @@ Enumeration::Enumeration(const MKLandscape & landscape_, size_t radius) : landsc
   // Table for tracking the fitness effects of making each move
   delta.resize(moves.size(), 0);
   fitness = 0;
-  reference.resize(landscape.get_length(), false);
+  improving_moves = 0;
+  reference.resize(length, false);
+  org_to_new.resize(length);
+  new_to_org.resize(length);
+  iota(org_to_new.begin(), org_to_new.end(), 0);
+  iota(new_to_org.begin(), new_to_org.end(), 0);
 }
 
 void Enumeration::initialize_deltas() {
@@ -72,13 +80,13 @@ void Enumeration::flip_move(size_t move_index) {
 int Enumeration::make_flip(size_t index) {
   // update fitness and record it
   fitness += delta[single_bit_moves[index]];
-  // For each subfunction effected by this flip
+  // For each subfunction affected by this flip
   for (const auto& sub : bit_to_sub[index]) {
     auto pre_move = landscape.evaluate(sub, reference);
     reference[index] = not reference[index];  // Put in the flip
     auto just_move = landscape.evaluate(sub, reference);
     reference[index] = not reference[index];  // Take out move
-    // for each move that overlaps the effected subfunction
+    // for each move that overlaps the affected subfunction
     for (const auto& next : sub_to_move[sub]) {
       flip_move(next);  // Put in next
       auto just_next = landscape.evaluate(sub, reference);
@@ -89,11 +97,15 @@ int Enumeration::make_flip(size_t index) {
 
       auto & bin = moves_in_bin[move_to_bin[next]];
       // if it was positive, remove it
-      bin -= (delta[next] > 0);
+      int was_improving = (delta[next] > 0);
+      bin -= was_improving;
+      improving_moves -= was_improving;
       // Take out old information and add in new information
       delta[next] += (pre_move - just_next + move_next - just_move);
       // if it is positive, add it
-      bin += (delta[next] > 0);
+      int is_improving = (delta[next] > 0);
+      bin += is_improving;
+      improving_moves += is_improving;
     }
   }
   reference[index] = not reference[index];  // Put in move
@@ -101,7 +113,6 @@ int Enumeration::make_flip(size_t index) {
 }
 
 void Enumeration::remap() {
-  int length = landscape.get_length();
   vector<int> location(moves.size(), -1);
   vector<unordered_set<int>> move_bin(length + 1);
   vector<vector<int>> bit_to_move(length);
@@ -120,8 +131,8 @@ void Enumeration::remap() {
   }
 
   int highest_available = length - 1;
-  org_to_new = vector<int>(length, -1);
-  new_to_org = vector<int>(length, -1);
+  org_to_new.assign(length, -1);
+  new_to_org.assign(length, -1);
 
   while (highest_available >= 0) {
     int move=-1;
@@ -156,7 +167,6 @@ void Enumeration::remap() {
 
 
 void Enumeration::bin_moves() {
-  int length = landscape.get_length();
   move_to_bin.resize(moves.size());
   moves_in_bin.resize(length);
   for (size_t move = 0; move < moves.size(); move++) {
@@ -171,40 +181,42 @@ void Enumeration::bin_moves() {
     // Assign the move to a bin
     move_to_bin[move] = min_dependency;
     // Increment the bin in this move is fitness improving
-    moves_in_bin[min_dependency] += (delta[move] > 0);
+    int is_improving = (delta[move] > 0);
+    moves_in_bin[min_dependency] += is_improving;
+    improving_moves += is_improving;
   }
 }
 
-using std::cout;
-using std::endl;
-void Enumeration::enumerate(std::ostream& out) {
-
-  int length = landscape.get_length();
-
+void Enumeration::enumerate(std::ostream& out, bool hyper,  bool reorder) {
   reference.assign(length, false);
 
   initialize_deltas();
-  remap();
+  if (reorder) {
+    remap();
+  }
   bin_moves();
-
 
   size_t count = 0;
   int pass=1;
   int progress = -1;
   cout << "Pass " << pass << ": ";
+  out << "# Fitness Representation" << endl;
   int i=length - 1;
   while (true) {
-    while (i >= 0 and moves_in_bin[i] == 0) {
-      i--;
+    if (hyper) {
+      while (i > 0 and moves_in_bin[i] == 0) {
+        i--;
+      }
+    } else {
+      i = 0;
     }
-    if (i == -1) { // nothing needs to be flipped to be a local optimum
+    if (improving_moves == 0) { // nothing needs to be flipped to be a local optimum
       out << fitness << " ";
       for (const auto bit : reference) {
         out << bit;
       }
       out << endl;
       count++;
-      i = 0;
     }
     while (i < length and reference[new_to_org[i]]) {
       make_flip(new_to_org[i]); // reference[i] = 0
@@ -215,11 +227,11 @@ void Enumeration::enumerate(std::ostream& out) {
       cout << endl;
       auto current = std::chrono::steady_clock::now();
       auto elapsed = std::chrono::duration<double>(current - start).count();
-      out << "Count: " << count << " Elapsed: " << elapsed << endl;
+      out << "# Count: " << count << " Seconds: " << elapsed << endl;
       return;
     }
     make_flip(new_to_org[i]); // reference[i] = 1
-    // output stuff
+    // Everything below here is just for output purposes
     if (i > progress) {
       progress=i;
       cout << i << ", ";

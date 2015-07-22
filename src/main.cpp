@@ -17,13 +17,22 @@ using namespace std;
 
 int main(int argc, char * argv[]) {
   assert(argc > 3);
-  string filename = argv[1];
-  string output = argv[2];
+  string problem_file = argv[1];
+  string output_file = argv[2];
   int radius = atoi(argv[3]);
-  MKLandscape problem(filename);
+
+  bool hyper = true;
+  if (argc > 4) {
+    hyper = atoi(argv[4]) != 0;
+  }
+  bool reorder = true;
+  if (argc > 5) {
+    reorder = atoi(argv[5]) != 0;
+  }
+  MKLandscape problem(problem_file);
 
   Enumeration find_local(problem, radius);
-  ofstream out(output);
-  find_local.enumerate(out);
-	return 0;
+  ofstream out(output_file);
+  find_local.enumerate(out, hyper, reorder);
+  return 0;
 }
