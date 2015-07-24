@@ -104,7 +104,7 @@ def create(folder, problem_name, N, K, seed):
     filename = path.join(folder, filename)
     problem = standard_problems[problem_name]
     with open(filename, "w") as f:
-        output_mk(args.N, args.K, problem[0], problem[1], f)
+        output_mk(N, K, problem[0], problem[1], f)
 
 if __name__ == '__main__':
     import argparse
