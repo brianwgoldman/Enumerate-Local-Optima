@@ -66,7 +66,7 @@ MKLandscape::MKLandscape(string filename)
 }
 
 int MKLandscape::evaluate(size_t subfunction_index,
-                          const vector<bool>& solution) const {
+                          const vector<char>& solution) const {
   const auto& subfunction = subfunctions[subfunction_index];
   size_t index = 0;
   for (const auto& neighbor : subfunction.variables) {

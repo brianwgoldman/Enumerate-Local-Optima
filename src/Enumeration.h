@@ -21,7 +21,7 @@ class Enumeration {
  protected:
   const MKLandscape& landscape;
   int length, radius;
-  vector<bool> reference;
+  vector<char> reference;
   int fitness;
   // List of all moves, which are just collections of indices
   vector<vector<size_t>> moves;

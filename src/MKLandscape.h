@@ -28,7 +28,7 @@ class MKLandscape {
   inline const size_t get_length() const {
     return length;
   }
-  int evaluate(size_t subfunction_index, const vector<bool> & solution) const;
+  int evaluate(size_t subfunction_index, const vector<char> & solution) const;
  protected:
   size_t length;
   vector<Subfunction> subfunctions;

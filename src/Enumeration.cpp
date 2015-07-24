@@ -217,7 +217,7 @@ void Enumeration::enumerate(std::ostream& out, bool hyper, bool reorder) {
     if (improving_moves == 0) {  // nothing needs to be flipped to be a local optimum
       out << fitness << " ";
       for (const auto bit : reference) {
-        out << bit;
+        out << (bit==1);
       }
       out << endl;
       count++;
