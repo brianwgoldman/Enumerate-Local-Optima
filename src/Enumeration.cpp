@@ -117,8 +117,8 @@ int Enumeration::make_flip(size_t index) {
 
 void Enumeration::remap() {
   vector<int> location(moves.size(), -1);
-  vector<unordered_set<int>> move_bin(length + 1);
-  vector<vector<int>> bit_to_move(length);
+  vector<unordered_set<int>> move_bin(length + 1, unordered_set<int>());
+  vector<vector<int>> bit_to_move(length, vector<int>());
   for (size_t move = 0; move < moves.size(); move++) {
     unordered_set<int> depends;
     for (const auto& sub : move_to_sub[move]) {

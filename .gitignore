@@ -8,3 +8,6 @@ gmon.out
 *.d
 Debug/MKL
 Release/MKL
+
+__pycache__
+*.pyc
