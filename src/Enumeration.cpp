@@ -10,9 +10,10 @@
 using std::cout;
 using std::endl;
 
-Enumeration::Enumeration(const MKLandscape & landscape_, size_t radius)
+Enumeration::Enumeration(const MKLandscape & landscape_, size_t radius_)
     : landscape(landscape_),
-      length(landscape_.get_length()) {
+      length(landscape_.get_length()),
+      radius(radius_){
   start = std::chrono::steady_clock::now();
   auto graph = build_graph(landscape);
   moves = k_order_subgraphs(graph, radius);
@@ -201,6 +202,8 @@ void Enumeration::enumerate(std::ostream& out, bool hyper, bool reorder) {
   int pass = 1;
   int progress = -1;
   cout << "Pass " << pass << ": ";
+  out << "# All " << radius << "-bit local optima. Hyper is " << (hyper? "on" : "off");
+  out << ". Reorder is " << (reorder? "on": "off") << "." << endl;
   out << "# Fitness Representation" << endl;
   int i = length - 1;
   while (true) {

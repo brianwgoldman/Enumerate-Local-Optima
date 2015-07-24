@@ -15,12 +15,12 @@
 
 class Enumeration {
  public:
-  Enumeration(const MKLandscape & landscape_, size_t radius);
+  Enumeration(const MKLandscape & landscape_, size_t radius_);
   void enumerate(std::ostream& out, bool hyper = true, bool reorder = true);
   int make_flip(size_t index);
  protected:
   const MKLandscape& landscape;
-  int length;
+  int length, radius;
   vector<bool> reference;
   int fitness;
   // List of all moves, which are just collections of indices
