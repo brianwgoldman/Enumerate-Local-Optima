@@ -100,7 +100,7 @@ standard_problems = {
 
 def create(folder, problem_name, N, K, seed):
     random.seed(seed)
-    filename = problem_name + "_{}_{}_{}".format(N, K, seed)
+    filename = problem_name + "_{}_{}_{}.txt".format(N, K, seed)
     filename = path.join(folder, filename)
     problem = standard_problems[problem_name]
     with open(filename, "w") as f:
