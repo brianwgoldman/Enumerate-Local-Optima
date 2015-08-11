@@ -239,16 +239,9 @@ void Enumeration::enumerate(std::ostream& out, bool hyper, bool reorder) {
   out << ". Reorder is " << (reorder? "on": "off") << "." << endl;
   out << "# Fitness Representation" << endl;
   int i = length - 1;
-
+  // tracks parity for the gray code counter
+  bool odd = false;
   while (true) {
-    if (hyper) {
-      // Hyperplanes let you skip areas with non zero move bins
-      while (i > 0 and moves_in_bin[i] == 0) {
-        i--;
-      }
-    } else {
-      i = 0;
-    }
     // If a local optima has been found, output it
     if (improving_moves == 0) {
       out << fitness << " ";
@@ -258,10 +251,29 @@ void Enumeration::enumerate(std::ostream& out, bool hyper, bool reorder) {
       out << endl;
       count++;
     }
-    // Perform carry operations
-    while (i < length and reference[new_to_org[i]]) {
-      make_flip(new_to_org[i]);  // reference[i] = 0
-      i++;
+    if (hyper) {
+      // Hyperplanes let you skip areas with non zero move bins
+      while (i > 0 and moves_in_bin[i] == 0) {
+        i--;
+      }
+      // Perform carry operations
+      while (i < length and reference[new_to_org[i]]) {
+        make_flip(new_to_org[i]);  // reference[i] = 0
+        i++;
+      }
+    } else {
+      // Perform gray code counting
+      i = 0;
+      if (odd) {
+        // when the parity of a gray code is odd, the next flip
+        // should occur after the least significant 1
+        while (i < length and reference[new_to_org[i]] == 0) {
+          i++;
+        }
+        // one more signficiant than the least signficiant 1
+        i++;
+      }
+      odd = not odd;
     }
     // End is reached
     if (i >= length) {
