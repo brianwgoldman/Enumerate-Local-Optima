@@ -18,6 +18,7 @@ MKLandscape::MKLandscape(string filename)
     : length(0) {
   std::ifstream input(filename);
   string line;
+  // First character of the line is used to specify its purpose
   char head;
   while (getline(input, line)) {
     // skip blank lines and commented out lines
@@ -28,6 +29,7 @@ MKLandscape::MKLandscape(string filename)
     line_stream >> head;
     // If this line is the problem statement
     if (head == 'p') {
+      // read in the problem
       string problem;
       line_stream >> problem;
       // ensure you have a file with the right format
@@ -37,6 +39,7 @@ MKLandscape::MKLandscape(string filename)
     } else if (head == 'm') {
       // creates a new subfunction
       subfunctions.emplace_back();
+      // add the variables associated with this subfunction
       size_t index;
       while (line_stream >> index) {
         subfunctions.back().variables.push_back(index);
@@ -44,6 +47,7 @@ MKLandscape::MKLandscape(string filename)
       // get the values line
       getline(input, line);
       std::istringstream values(line);
+      // Add the values associated with this subfunction
       double value;
       while (values >> value) {
         subfunctions.back().values.push_back(value);
@@ -68,6 +72,7 @@ MKLandscape::MKLandscape(string filename)
 int MKLandscape::evaluate(size_t subfunction_index,
                           const vector<char>& solution) const {
   const auto& subfunction = subfunctions[subfunction_index];
+  // Convert the solution's values to an index into the fitness table
   size_t index = 0;
   for (const auto& neighbor : subfunction.variables) {
     index = (index << 1) | solution[neighbor];

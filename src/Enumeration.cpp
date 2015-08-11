@@ -1,9 +1,9 @@
-/*
- * Enumeration.cpp
- *
- *  Created on: Jul 21, 2015
- *      Author: goldman
- */
+// Brian Goldman
+
+// Find all solutions of a given MK Landscape
+// which cannot be improved by flipping "radius_"
+// or less bits. This process is made much more efficient
+// by exploiting features of the Gray-Box domain.
 
 #include "Enumeration.h"
 #include <algorithm>
@@ -14,11 +14,15 @@ Enumeration::Enumeration(const MKLandscape & landscape_, size_t radius_)
     : landscape(landscape_),
       length(landscape_.get_length()),
       radius(radius_){
+  // Start the clock
   start = std::chrono::steady_clock::now();
+  // Find all necessary moves of radius or less bits
   auto graph = build_graph(landscape);
   moves = k_order_subgraphs(graph, radius);
-  bit_to_sub.resize(length);
 
+  // Set up a mapping between bits and the MK subfunctions they
+  // are in
+  bit_to_sub.resize(length);
   const auto& subfunctions = landscape.get_subfunctions();
   for (size_t sub = 0; sub < subfunctions.size(); sub++) {
     for (const auto& bit : subfunctions[sub].variables) {
@@ -26,10 +30,11 @@ Enumeration::Enumeration(const MKLandscape & landscape_, size_t radius_)
     }
   }
 
+  // Set up mapping from moves to the functions they affect
+  // and vice versa
   sub_to_move.resize(subfunctions.size());
   move_to_sub.resize(moves.size());
   single_bit_moves.resize(length, -1);
-
   for (size_t m = 0; m < moves.size(); m++) {
     if (moves[m].size() == 1) {
       single_bit_moves[moves[m][0]] = m;
@@ -47,6 +52,8 @@ Enumeration::Enumeration(const MKLandscape & landscape_, size_t radius_)
   fitness = 0;
   improving_moves = 0;
   reference.resize(length, false);
+
+  // Set up reorder mapping tools, initially no change in ordering
   org_to_new.resize(length);
   new_to_org.resize(length);
   iota(org_to_new.begin(), org_to_new.end(), 0);
@@ -116,28 +123,39 @@ int Enumeration::make_flip(size_t index) {
 }
 
 void Enumeration::remap() {
-  vector<int> location(moves.size(), -1);
+  // Bin of moves based on how many dependencies it still has unsatisfied.
   vector<unordered_set<int>> move_bin(length + 1, unordered_set<int>());
+  // Location of a move in the move_bin
+  vector<int> location(moves.size(), -1);
+  // Lookup for finding all moves with non-linear relationships to a bit
   vector<vector<int>> bit_to_move(length, vector<int>());
+
   for (size_t move = 0; move < moves.size(); move++) {
     unordered_set<int> depends;
+    // A move depends on all bits in all subfunctions it overlaps
     for (const auto& sub : move_to_sub[move]) {
       for (int bit : landscape.get_subfunctions()[sub].variables) {
         depends.insert(bit);
       }
     }
+    // Put the move in the bin based on its dependency
     move_bin[depends.size()].insert(move);
     location[move] = depends.size();
+    // record all of its dependencies
     for (const auto& bit : depends) {
       bit_to_move[bit].push_back(move);
     }
   }
 
+  // Initially no position is assigned to anything
   int highest_available = length - 1;
   org_to_new.assign(length, -1);
   new_to_org.assign(length, -1);
 
+  // Loop until every position is assigned
   while (highest_available >= 0) {
+    // Find the move with the least remaining dependencies
+    // that has yet to be assigned a position
     int move = -1;
     for (const auto& bin : move_bin) {
       if (bin.size()) {
@@ -145,17 +163,23 @@ void Enumeration::remap() {
         break;
       }
     }
+    // If no more moves have to be assigned places, stop
     if (move == -1) {
       break;
     }
 
+    // For all bits in all subfunctions related to that move,
+    // assign those bits as high as possible
     for (const auto& sub : move_to_sub[move]) {
       for (int bit : landscape.get_subfunctions()[sub].variables) {
+        // if the bit hasn't been assigned a new position
         if (org_to_new[bit] == -1) {
           org_to_new[bit] = highest_available;
           new_to_org[highest_available] = bit;
+          // Update how many dependencies all other moves have
           for (const auto& affected : bit_to_move[bit]) {
             int current = location[affected];
+            // shift the affected move down 1 in the move_bin
             move_bin[current].erase(affected);
             move_bin[current - 1].insert(affected);
             location[affected] = current - 1;
@@ -164,6 +188,7 @@ void Enumeration::remap() {
         }
       }
     }
+    // Remove the assigned move from the move bin
     move_bin[0].erase(move);
   }
 }
@@ -172,9 +197,11 @@ void Enumeration::bin_moves() {
   move_to_bin.resize(moves.size());
   moves_in_bin.resize(length);
   for (size_t move = 0; move < moves.size(); move++) {
+    // For each move, find its dependency with the minimum index
     int min_dependency = length;
     for (const auto& sub : move_to_sub[move]) {
       for (int bit : landscape.get_subfunctions()[sub].variables) {
+        // Use the new ordering to determine "minimum"
         if (min_dependency > org_to_new[bit]) {
           min_dependency = org_to_new[bit];
         }
@@ -182,7 +209,7 @@ void Enumeration::bin_moves() {
     }
     // Assign the move to a bin
     move_to_bin[move] = min_dependency;
-    // Increment the bin in this move is fitness improving
+    // If the move is fitness improving, increment its corresponding bin
     int is_improving = (delta[move] > 0);
     moves_in_bin[min_dependency] += is_improving;
     improving_moves += is_improving;
@@ -190,15 +217,21 @@ void Enumeration::bin_moves() {
 }
 
 void Enumeration::enumerate(std::ostream& out, bool hyper, bool reorder) {
+  // start from all 0s
   reference.assign(length, false);
 
+  // calculate initial effects of making all possible moves
   initialize_deltas();
   if (reorder) {
+    // if configured to do so, change enumeration order
     remap();
   }
+  // Determine which and how many improving moves exist
   bin_moves();
-
+  // tracks how many local optima are found
   size_t count = 0;
+
+  // Used to output progress to the screen
   int pass = 1;
   int progress = -1;
   cout << "Pass " << pass << ": ";
@@ -206,15 +239,18 @@ void Enumeration::enumerate(std::ostream& out, bool hyper, bool reorder) {
   out << ". Reorder is " << (reorder? "on": "off") << "." << endl;
   out << "# Fitness Representation" << endl;
   int i = length - 1;
+
   while (true) {
     if (hyper) {
+      // Hyperplanes let you skip areas with non zero move bins
       while (i > 0 and moves_in_bin[i] == 0) {
         i--;
       }
     } else {
       i = 0;
     }
-    if (improving_moves == 0) {  // nothing needs to be flipped to be a local optimum
+    // If a local optima has been found, output it
+    if (improving_moves == 0) {
       out << fitness << " ";
       for (const auto bit : reference) {
         out << (bit==1);
@@ -222,6 +258,7 @@ void Enumeration::enumerate(std::ostream& out, bool hyper, bool reorder) {
       out << endl;
       count++;
     }
+    // Perform carry operations
     while (i < length and reference[new_to_org[i]]) {
       make_flip(new_to_org[i]);  // reference[i] = 0
       i++;
@@ -235,7 +272,7 @@ void Enumeration::enumerate(std::ostream& out, bool hyper, bool reorder) {
       return;
     }
     make_flip(new_to_org[i]);  // reference[i] = 1
-    // Everything below here is just for output purposes
+    // Everything below here is just for screen output purposes
     if (i > progress) {
       progress = i;
       cout << i << ", ";

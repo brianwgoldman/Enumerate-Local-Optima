@@ -1,9 +1,8 @@
-/*
- * GraphUtilities.h
- *
- *  Created on: Jul 21, 2015
- *      Author: goldman
- */
+// Brian Goldman
+
+// A collection of tools for creating variable interaction
+// graphs and finding k-oder subgraphs. These are used
+// when finding all useful moves in an r-bit hamming ball.
 
 #ifndef GRAPHUTILITIES_H_
 #define GRAPHUTILITIES_H_
@@ -14,7 +13,7 @@ using std::vector;
 #include <unordered_set>
 using std::unordered_set;
 
-// Constructs a sparse graph from the epistasis tables of the evaluator
+// Constructs a sparse graph from the variable interaction tables of the evaluator
 vector<unordered_set<size_t>> build_graph(const MKLandscape& evaluator);
 
 // Finds all connected induced subgraphs with "radius" or less vertices.

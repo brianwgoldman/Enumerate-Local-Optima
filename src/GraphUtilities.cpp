@@ -1,10 +1,7 @@
-/*
- * GraphUtilities.cpp
- *
- *  Created on: Jul 21, 2015
- *      Author: goldman
- */
+// Brian Goldman
 
+// Tools for converting an MK Landscape into a variable interaction graph
+// and then finding all moves in the r-bit hamming ball.
 #include "GraphUtilities.h"
 
 vector<unordered_set<size_t>> build_graph(const MKLandscape& landscape) {
@@ -12,6 +9,7 @@ vector<unordered_set<size_t>> build_graph(const MKLandscape& landscape) {
                                       unordered_set<size_t>());
   const auto& subfunctions = landscape.get_subfunctions();
   for (const auto & subfunction : subfunctions) {
+    // all variables which share a subfunction have an edge
     for (const auto & x : subfunction.variables) {
       for (const auto & y : subfunction.variables) {
         if (x != y) {
