@@ -252,7 +252,8 @@ void Enumeration::enumerate(std::ostream& out, bool hyper, bool reorder) {
       count++;
     }
     if (hyper) {
-      // Hyperplanes let you skip areas with non zero move bins
+      // Hyperplanes let you skip areas below the highest
+      // non-zero move bin
       while (i > 0 and moves_in_bin[i] == 0) {
         i--;
       }
