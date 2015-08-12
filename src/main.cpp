@@ -32,12 +32,18 @@ using namespace std;
 int main(int argc, char * argv[]) {
   if (argc < 4) {
     // Help message
-    cout << "Usage: input_filename output_filename radius [use_hyperplanes] [use_reordering]" << endl;
-    cout << endl;
-    cout << "By default hyperplanes and reordering are used, but can be set to 0 to turn off" << endl;
-    cout << "Example: ./MKL input.txt output.txt 2 1 0" << endl;
-    cout << "         This will read a problem from input.txt, write local optima to output.txt," << endl;
-    cout << "         only find 2-bit local optima, use hyperplanes but turn off reordering." << endl;
+    cout
+        << "Usage: input_filename output_filename radius [use_hyperplanes] [use_reordering]"
+        << endl
+        << endl
+        << "By default hyperplanes and reordering are used, but can be set to 0 to turn off"
+        << endl
+        << "Example: ./MKL input.txt output.txt 2 1 0"
+        << endl
+        << "         This will read a problem from input.txt, write local optima to output.txt,"
+        << endl
+        << "         only find 2-bit local optima, use hyperplanes but turn off reordering."
+        << endl;
     return 0;
   }
   string problem_file = argv[1];

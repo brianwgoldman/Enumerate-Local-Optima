@@ -13,7 +13,7 @@ using std::endl;
 Enumeration::Enumeration(const MKLandscape & landscape_, size_t radius_)
     : landscape(landscape_),
       length(landscape_.get_length()),
-      radius(radius_){
+      radius(radius_) {
   // Start the clock
   start = std::chrono::steady_clock::now();
   // Find all necessary moves of radius or less bits
@@ -235,9 +235,9 @@ void Enumeration::enumerate(std::ostream& out, bool hyper, bool reorder) {
   int pass = 1;
   int progress = -1;
   cout << "Pass " << pass << ": ";
-  out << "# All " << radius << "-bit local optima. Hyper is " << (hyper? "on" : "off");
-  out << ". Reorder is " << (reorder? "on": "off") << "." << endl;
-  out << "# Fitness Representation" << endl;
+  out << "# All " << radius << "-bit local optima" << ". Hyper is "
+      << (hyper ? "on" : "off") << ". Reorder is " << (reorder ? "on" : "off")
+      << "." << endl << "# Fitness Representation" << endl;
   int i = length - 1;
   // tracks parity for the gray code counter
   bool odd = false;
@@ -246,7 +246,7 @@ void Enumeration::enumerate(std::ostream& out, bool hyper, bool reorder) {
     if (improving_moves == 0) {
       out << fitness << " ";
       for (const auto bit : reference) {
-        out << (bit==1);
+        out << (bit == 1);
       }
       out << endl;
       count++;
