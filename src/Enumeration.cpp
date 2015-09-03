@@ -238,7 +238,7 @@ void Enumeration::enumerate(std::ostream& out, bool hyper, bool reorder) {
   out << "# All " << radius << "-bit local optima" << ". Hyper is "
       << (hyper ? "on" : "off") << ". Reorder is " << (reorder ? "on" : "off")
       << "." << endl << "# Fitness Representation" << endl;
-  int i = length - 1;
+  int index = length - 1;
   // tracks parity for the gray code counter
   bool odd = false;
   while (true) {
@@ -254,41 +254,41 @@ void Enumeration::enumerate(std::ostream& out, bool hyper, bool reorder) {
     if (hyper) {
       // Hyperplanes let you skip areas below the highest
       // non-zero move bin
-      while (i > 0 and moves_in_bin[i] == 0) {
-        i--;
+      while (index > 0 and moves_in_bin[index] == 0) {
+        index--;
       }
       // Perform carry operations
-      while (i < length and reference[new_to_org[i]]) {
-        make_flip(new_to_org[i]);  // reference[i] = 0
-        i++;
+      while (index < length and reference[new_to_org[index]]) {
+        make_flip(new_to_org[index]);  // reference[index] = 0
+        index++;
       }
     } else {
       // Perform gray code counting
-      i = 0;
+      index = 0;
       if (odd) {
         // when the parity of a gray code is odd, the next flip
         // should occur after the least significant 1
-        while (i < length and reference[new_to_org[i]] == 0) {
-          i++;
+        while (index < length and reference[new_to_org[index]] == 0) {
+          index++;
         }
         // one more signficiant than the least signficiant 1
-        i++;
+        index++;
       }
       odd = not odd;
     }
     // End is reached
-    if (i >= length) {
+    if (index >= length) {
       cout << endl;
       auto current = std::chrono::steady_clock::now();
       auto elapsed = std::chrono::duration<double>(current - start).count();
       out << "# Count: " << count << " Seconds: " << elapsed << endl;
       return;
     }
-    make_flip(new_to_org[i]);  // reference[i] = 1
+    make_flip(new_to_org[index]);  // reference[index] = 1
     // Everything below here is just for screen output purposes
-    if (i > progress) {
-      progress = i;
-      cout << i << ", ";
+    if (index > progress) {
+      progress = index;
+      cout << index << ", ";
       cout.flush();
       if (progress == length - pass) {
         progress = -1;
