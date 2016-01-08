@@ -1,18 +1,13 @@
-/*
- * MKLandscape.cpp
- *
- *  Created on: Jul 20, 2015
- *      Author: goldman
- */
+// Brian Goldman
+
+// Implements an MK Landscape, which is any problem that
+// can be expressed as the sum of M subfunctions,
+// each of which read at most k problem variables.
 
 #include "MKLandscape.h"
 #include <fstream>
 #include <sstream>
 #include <cassert>
-
-// Temporary
-using std::cout;
-using std::endl;
 
 MKLandscape::MKLandscape(string filename)
     : length(0) {
