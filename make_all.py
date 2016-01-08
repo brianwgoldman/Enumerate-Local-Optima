@@ -9,7 +9,7 @@ target_K = {"DeceptiveTrap" : 5, "MAXSAT" : 3, "IsingSpinGlass" : 2,
             "AdjacentNKq" : 3, "RandomNKq" : 3}
 
 for problem_name in make_mk.standard_problems:
-    for N in range(15, 71):
+    for N in range(15, 101):
         for seed in range(30):
             K = target_K[problem_name]
             if problem_name == "DeceptiveTrap":
@@ -22,3 +22,5 @@ for problem_name in make_mk.standard_problems:
                 if N > 50:
                     continue
             make_mk.create(folder, problem_name, N, K, seed)
+for seed in range(30):
+    make_mk.create(folder, "AdjacentNKq", 200, 3, seed)
