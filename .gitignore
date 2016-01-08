@@ -11,3 +11,4 @@ Release/MKL
 
 __pycache__
 *.pyc
+*~
