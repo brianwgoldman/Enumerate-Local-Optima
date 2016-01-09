@@ -14,3 +14,8 @@ If you run with no arguments you will see the help message explaining all argume
 Release/MKL
 
 Also, see main.cpp for implementation related details.
+
+To create problem files, use make_mk.py or make_all.py.
+
+Result data can be found with each paper's "Release" on github
+at https://github.com/brianwgoldman/Enumerate-Local-Optima/releases
